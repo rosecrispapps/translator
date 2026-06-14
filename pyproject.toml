@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mandarin-youtube-transcript-agent"
+version = "0.1.0"
+description = "Translate Mandarin YouTube speech into English transcript files."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "faster-whisper",
+    "yt-dlp",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+mandarin-youtube-transcript = "mandarin_youtube_transcript_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
