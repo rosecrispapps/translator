@@ -1,0 +1,24 @@
+{
+  "name": "translator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A simple full-stack text translator (Express API + React UI).",
+  "workspaces": [
+    "packages/server",
+    "packages/client"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client -c blue,green \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev --workspace @translator/server",
+    "dev:client": "npm run dev --workspace @translator/client",
+    "build": "npm run build --workspace @translator/server && npm run build --workspace @translator/client",
+    "lint": "npm run lint --workspace @translator/server && npm run lint --workspace @translator/client",
+    "test": "npm run test --workspace @translator/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
