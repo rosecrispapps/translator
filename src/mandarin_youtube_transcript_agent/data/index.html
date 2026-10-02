@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mandarin YouTube → English transcript</title>
+  <style>
+    :root {
+      --bg: #f3ecdf;
+      --ink: #221c16;
+      --muted: #6d6256;
+      --line: #e3d7c6;
+      --surface: #fffdf8;
+      --accent: #9d2c18;
+      --accent-dark: #7c2212;
+      --ok: #1f6b45;
+      --idle: #cfc3b2;
+      --shadow: 0 18px 50px rgba(60, 36, 14, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(157, 44, 24, 0.08), transparent 28rem),
+        var(--bg);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      font-size: 17px;
+      line-height: 1.45;
+    }
+
+    main {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .lede {
+      margin: 8px 0 0;
+      max-width: 38rem;
+      color: var(--muted);
+    }
+
+    .mode-chip {
+      flex: none;
+      margin: 0;
+      padding: 8px 12px;
+      border: 1px solid #e7c7bf;
+      border-radius: 999px;
+      background: #fff7f4;
+      color: var(--accent-dark);
+      font-size: 0.85rem;
+      font-weight: 650;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+    }
+
+    input[type="url"] {
+      width: 100%;
+      border: 0;
+      padding: 12px 14px;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 1.05rem;
+    }
+
+    input:focus { outline: none; }
+
+    form:focus-within {
+      border-color: #e2b2a8;
+      box-shadow: 0 0 0 4px rgba(157, 44, 24, 0.12), var(--shadow);
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 0 22px;
+      background: var(--accent);
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--accent-dark); }
+
+    button:disabled {
+      background: #c9b8aa;
+      cursor: progress;
+    }
+
+    #status {
+      min-height: 1.4em;
+      margin: 14px 2px 18px;
+      color: var(--muted);
+    }
+
+    #status[data-kind="error"] {
+      color: var(--accent-dark);
+      font-weight: 650;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .steps {
+      margin: 0;
+      padding: 8px;
+      list-style: none;
+    }
+
+    .steps li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: var(--muted);
+    }
+
+    .steps li[data-status="running"] {
+      background: #fff4ef;
+      color: var(--ink);
+    }
+
+    .steps li[data-status="done"] { color: var(--ink); }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: #f3eadf;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    li[data-status="running"] .mark {
+      background: var(--accent);
+      color: white;
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    li[data-status="done"] .mark {
+      background: var(--ok);
+      color: white;
+    }
+
+    @keyframes pulse {
+      50% { transform: scale(0.92); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      li[data-status="running"] .mark { animation: none; }
+    }
+
+    .transcript {
+      padding: 18px 20px 8px;
+      min-height: 340px;
+    }
+
+    .transcript-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+
+    .transcript h2 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+
+    .meta, .notice, .empty {
+      color: var(--muted);
+    }
+
+    .meta {
+      margin: 0;
+      font-size: 0.92rem;
+    }
+
+    .notice, .empty { margin: 8px 0 12px; }
+
+    .line {
+      display: grid;
+      grid-template-columns: 4.2rem 1fr;
+      gap: 12px;
+      padding: 10px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .time {
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .line p { margin: 0; }
+
+    @media (max-width: 800px) {
+      header { flex-direction: column; align-items: flex-start; }
+      form { grid-template-columns: 1fr; }
+      button { height: 46px; }
+      .workspace { grid-template-columns: 1fr; }
+      .transcript { min-height: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow">Mandarin YouTube</p>
+        <h1>English transcript</h1>
+        <p class="lede">Paste a link. The pipeline checks it, pulls the audio, and writes timed English lines.</p>
+      </div>
+      <p class="mode-chip">Demo mode · sample transcript</p>
+    </header>
+
+    <form id="translate-form">
+      <label for="url">YouTube URL</label>
+      <input id="url" name="url" type="text" inputmode="url" spellcheck="false" autocomplete="off" value="__SAMPLE_URL__" autofocus />
+      <button id="submit" type="submit">Translate</button>
+    </form>
+    <p id="status" role="status">Ready. The sample link is filled in.</p>
+
+    <div class="workspace">
+      <section class="panel" aria-label="Pipeline">
+        <ol class="steps" id="steps">
+          <li data-stage="validate"><span class="mark">1</span><span>Check the YouTube link</span></li>
+          <li data-stage="download"><span class="mark">2</span><span>Download audio with yt-dlp</span></li>
+          <li data-stage="convert"><span class="mark">3</span><span>Convert to WAV with ffmpeg</span></li>
+          <li data-stage="translate"><span class="mark">4</span><span>Translate with Whisper</span></li>
+          <li data-stage="write"><span class="mark">5</span><span>Write the English transcript</span></li>
+        </ol>
+      </section>
+
+      <section class="panel transcript" aria-live="polite">
+        <div class="transcript-head">
+          <h2 id="title">English transcript</h2>
+          <p class="meta" id="meta"></p>
+        </div>
+        <p class="empty" id="empty">Waiting for a link. The English lines will land here.</p>
+        <p class="notice" id="notice" hidden></p>
+        <div id="lines"></div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const form = document.querySelector("#translate-form");
+    const urlInput = document.querySelector("#url");
+    const submit = document.querySelector("#submit");
+    const status = document.querySelector("#status");
+    const empty = document.querySelector("#empty");
+    const notice = document.querySelector("#notice");
+    const meta = document.querySelector("#meta");
+    const title = document.querySelector("#title");
+    const lines = document.querySelector("#lines");
+    const steps = [...document.querySelectorAll("#steps li")];
+    let presentTail = Promise.resolve();
+    let runningStep = null;
+
+    function setStatus(message, kind) {
+      status.textContent = message;
+      status.dataset.kind = kind || "";
+    }
+
+    function resetSteps() {
+      for (const step of steps) {
+        delete step.dataset.status;
+        step.querySelector(".mark").textContent = step.dataset.stage === "validate" ? "1"
+          : step.dataset.stage === "download" ? "2"
+          : step.dataset.stage === "convert" ? "3"
+          : step.dataset.stage === "translate" ? "4"
+          : "5";
+      }
+    }
+
+    function markStep(stage, state) {
+      const step = steps.find((item) => item.dataset.stage === stage);
+      if (!step) return;
+      step.dataset.status = state;
+      if (state === "done") step.querySelector(".mark").textContent = "✓";
+    }
+
+    function clock(seconds) {
+      const total = Math.max(0, Math.round(seconds));
+      const minutes = Math.floor(total / 60);
+      const remain = total % 60;
+      return `${minutes}:${String(remain).padStart(2, "0")}`;
+    }
+
+    function showTranscript(result) {
+      empty.hidden = true;
+      title.textContent = result.title || "English transcript";
+      const count = result.segments.length;
+      meta.textContent = `${result.video_id} · source ${result.source_language} · ${clock(result.duration)} · ${count} lines`;
+      notice.hidden = false;
+      notice.textContent = result.notice;
+      lines.replaceChildren();
+      for (const segment of result.segments) {
+        const row = document.createElement("article");
+        row.className = "line";
+        const time = document.createElement("div");
+        time.className = "time";
+        time.textContent = clock(segment.start);
+        const text = document.createElement("p");
+        text.textContent = segment.text;
+        row.append(time, text);
+        lines.append(row);
+      }
+    }
+
+    function clearTranscript() {
+      title.textContent = "English transcript";
+      meta.textContent = "";
+      notice.hidden = true;
+      notice.textContent = "";
+      lines.replaceChildren();
+      empty.hidden = false;
+      empty.textContent = "Working…";
+    }
+
+    function present(event) {
+      presentTail = presentTail.then(async () => {
+        if (event.status === "done" && runningStep) {
+          const hold = runningStep.stage === "translate" ? 2000 : 1500;
+          const wait = Math.max(0, hold - (Date.now() - runningStep.at));
+          if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
+        }
+        if (event.status === "error") {
+          setStatus(event.message, "error");
+        } else {
+          markStep(event.stage, event.status === "done" ? "done" : "running");
+          setStatus(event.message, "");
+          if (event.result) showTranscript(event.result);
+        }
+        if (event.status === "running") runningStep = { stage: event.stage, at: Date.now() };
+        if (event.status === "done") runningStep = null;
+      });
+      return presentTail;
+    }
+
+    async function translate(url) {
+      submit.disabled = true;
+      submit.textContent = "Working…";
+      resetSteps();
+      clearTranscript();
+      setStatus("Starting…", "");
+      presentTail = Promise.resolve();
+      runningStep = null;
+
+      let response;
+      try {
+        response = await fetch("/api/translate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+      } catch (error) {
+        setStatus("The demo server did not respond.", "error");
+        empty.textContent = "Waiting for a link. The English lines will land here.";
+        submit.disabled = false;
+        submit.textContent = "Translate";
+        return;
+      }
+
+      if (!response.ok) {
+        let message = "That link could not be translated.";
+        try {
+          const payload = await response.json();
+          if (payload.error) message = payload.error;
+        } catch (_error) {
+          /* keep the fallback message */
+        }
+        setStatus(message, "error");
+        empty.textContent = "Waiting for a link. The English lines will land here.";
+        submit.disabled = false;
+        submit.textContent = "Translate";
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n");
+        buffer = parts.pop();
+        for (const part of parts) {
+          if (!part.trim()) continue;
+          present(JSON.parse(part));
+        }
+      }
+      if (buffer.trim()) present(JSON.parse(buffer));
+      await presentTail;
+
+      submit.disabled = false;
+      submit.textContent = "Translate";
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      translate(urlInput.value);
+    });
+  </script>
+</body>
+</html>

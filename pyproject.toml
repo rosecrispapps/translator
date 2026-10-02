@@ -20,6 +20,13 @@ dev = [
 
 [project.scripts]
 mandarin-youtube-transcript = "mandarin_youtube_transcript_agent.cli:main"
+mandarin-youtube-demo = "mandarin_youtube_transcript_agent.web:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+mandarin_youtube_transcript_agent = ["data/*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

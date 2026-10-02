@@ -1,0 +1,49 @@
+{
+  "video_id": "ZhDemoTai01",
+  "title": "Taipei breakfast stall",
+  "source_language": "zh",
+  "source_language_probability": 0.97,
+  "duration": 47.4,
+  "segments": [
+    {
+      "start": 0.6,
+      "end": 4.8,
+      "text": "Good morning. I am at a breakfast stall near Yongkang Street."
+    },
+    {
+      "start": 5.1,
+      "end": 10.4,
+      "text": "The owner has been frying scallion pancakes here since five in the morning."
+    },
+    {
+      "start": 10.8,
+      "end": 16.2,
+      "text": "This one is filled with egg and a little bit of sweet soy sauce."
+    },
+    {
+      "start": 16.6,
+      "end": 22.0,
+      "text": "If you come later than nine, the sesame flatbread is usually gone."
+    },
+    {
+      "start": 22.4,
+      "end": 28.5,
+      "text": "She says the dough rests overnight so it stays flaky, not tough."
+    },
+    {
+      "start": 29.0,
+      "end": 34.2,
+      "text": "I will take one pancake and a cup of hot soy milk, unsweetened."
+    },
+    {
+      "start": 34.6,
+      "end": 40.8,
+      "text": "The soy milk is freshly ground. You can smell the beans from the street."
+    },
+    {
+      "start": 41.2,
+      "end": 47.4,
+      "text": "That is breakfast in Taipei: hot, fast, and gone by midmorning."
+    }
+  ]
+}

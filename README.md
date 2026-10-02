@@ -6,7 +6,30 @@ The package provides:
 
 - A reusable `MandarinYoutubeTranscriptAgent` Python class.
 - A `mandarin-youtube-transcript` CLI.
+- A local web demo for a one-minute walkthrough.
 - SRT, VTT, plain text, and JSON transcript output.
+
+## 60-second demo
+
+Demo mode walks the real pipeline and shows a bundled English transcript. It does not download audio or a Whisper model.
+
+```bash
+pip install -e . --no-deps
+python -m mandarin_youtube_transcript_agent.web
+```
+
+`--no-deps` is enough for the demo. Open http://127.0.0.1:8765. The sample YouTube link is already filled in. Click **Translate** and read the English lines.
+
+The same happy path in the terminal:
+
+```bash
+python -m mandarin_youtube_transcript_agent --demo "https://www.youtube.com/watch?v=ZhDemoTai01" \
+  --format txt \
+  --output transcript.txt \
+  --demo-delay 0
+```
+
+The recording script, narration, and the live yt-dlp / Whisper command are in [DEMO.md](DEMO.md).
 
 ## Requirements
 
