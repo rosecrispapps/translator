@@ -25,7 +25,7 @@ Open that URL in a desktop browser. Use a window about 1280×720 so the steps an
 https://www.youtube.com/watch?v=ZhDemoTai01
 ```
 
-Do one rehearsal click so you know the steps take about six seconds. Reload the page before the real take so the transcript panel is empty again.
+Do one rehearsal click so you know the steps take about seven seconds. Reload the page before the real take so the transcript panel is empty again.
 
 ## What the viewer should see
 
@@ -44,7 +44,7 @@ Speak at a normal pace. The pipeline animation covers the middle of the take. Yo
 | 0:00–0:08 | Show the full page. Leave the sample URL in the field. | This turns a Mandarin YouTube video into an English transcript. |
 | 0:08–0:14 | Click the URL field so the link is obvious. | I paste a YouTube link. Watch links, Shorts, and youtu.be all work. |
 | 0:14–0:18 | Click **Translate**. | Translate. |
-| 0:18–0:28 | Watch the five steps. The English lines show up when the last step finishes, about six seconds after the click. | It checks the link, downloads the audio with yt-dlp, converts it with ffmpeg, and Whisper translates the Mandarin into English. |
+| 0:18–0:32 | Watch the five steps. The English lines show up when the last step finishes, about seven seconds after the click. | It checks the link, downloads the audio with yt-dlp, converts it with ffmpeg, and Whisper translates the Mandarin into English. |
 | 0:28–0:42 | Point at the lines and the demo note under the title. | This take is demo mode, so you are seeing a bundled sample. The live command runs yt-dlp and faster-whisper on the real audio. |
 | 0:42–1:00 | Read the first line, then point at its timestamp. | The first line is: Good morning. I am at a breakfast stall near Yongkang Street. Every line has a timestamp, same as an SRT file. Link in, English out. |
 

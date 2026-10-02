@@ -318,8 +318,13 @@
     const title = document.querySelector("#title");
     const lines = document.querySelector("#lines");
     const steps = [...document.querySelectorAll("#steps li")];
-    let presentTail = Promise.resolve();
-    let runningStep = null;
+    const beatMs = {
+      validate: 700,
+      download: 1500,
+      convert: 1500,
+      translate: 2100,
+      write: 700,
+    };
 
     function setStatus(message, kind) {
       status.textContent = message;
@@ -345,7 +350,7 @@
     }
 
     function clock(seconds) {
-      const total = Math.max(0, Math.round(seconds));
+      const total = Math.max(0, Math.floor(seconds));
       const minutes = Math.floor(total / 60);
       const remain = total % 60;
       return `${minutes}:${String(remain).padStart(2, "0")}`;
@@ -382,24 +387,26 @@
       empty.textContent = "Working…";
     }
 
-    function present(event) {
-      presentTail = presentTail.then(async () => {
-        if (event.status === "done" && runningStep) {
-          const hold = runningStep.stage === "translate" ? 2000 : 1500;
-          const wait = Math.max(0, hold - (Date.now() - runningStep.at));
-          if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
-        }
-        if (event.status === "error") {
-          setStatus(event.message, "error");
-        } else {
-          markStep(event.stage, event.status === "done" ? "done" : "running");
-          setStatus(event.message, "");
-          if (event.result) showTranscript(event.result);
-        }
-        if (event.status === "running") runningStep = { stage: event.stage, at: Date.now() };
-        if (event.status === "done") runningStep = null;
-      });
-      return presentTail;
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function eventsFromNdjson(body) {
+      return body.split("\n").filter((line) => line.trim()).map((line) => JSON.parse(line));
+    }
+
+    async function playEvents(events) {
+      const result = events.find((event) => event.result);
+      for (const stage of Object.keys(beatMs)) {
+        const running = events.find((event) => event.stage === stage && event.status === "running");
+        const done = events.find((event) => event.stage === stage && event.status === "done");
+        markStep(stage, "running");
+        setStatus((running || done || {}).message || "Working…", "");
+        await sleep(beatMs[stage]);
+        markStep(stage, "done");
+        if (done) setStatus(done.message, "");
+      }
+      if (result) showTranscript(result.result);
     }
 
     async function translate(url) {
@@ -408,15 +415,14 @@
       resetSteps();
       clearTranscript();
       setStatus("Starting…", "");
-      presentTail = Promise.resolve();
-      runningStep = null;
 
       let response;
       try {
         response = await fetch("/api/translate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
+          // The page paces the steps. Ask the server not to add its own pauses.
+          body: JSON.stringify({ url, delay_s: 0 }),
         });
       } catch (error) {
         setStatus("The demo server did not respond.", "error");
@@ -441,22 +447,8 @@
         return;
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split("\n");
-        buffer = parts.pop();
-        for (const part of parts) {
-          if (!part.trim()) continue;
-          present(JSON.parse(part));
-        }
-      }
-      if (buffer.trim()) present(JSON.parse(buffer));
-      await presentTail;
+      const events = eventsFromNdjson(await response.text());
+      await playEvents(events);
 
       submit.disabled = false;
       submit.textContent = "Translate";
