@@ -5,7 +5,8 @@ import sys
 from pathlib import Path
 
 from .agent import AgentConfig, MandarinYoutubeTranscriptAgent, TranscriptAgentError
-from .formatters import SUPPORTED_FORMATS
+from .demo_run import DEFAULT_DEMO_DELAY_S, demo_segments, iter_demo_events
+from .formatters import SUPPORTED_FORMATS, format_transcript
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -58,6 +59,17 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Save the downloaded WAV audio next to the transcript.",
     )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="Show the happy path with a bundled English sample. Does not download audio or run Whisper.",
+    )
+    parser.add_argument(
+        "--demo-delay",
+        type=float,
+        default=DEFAULT_DEMO_DELAY_S,
+        help="Seconds between demo progress lines. Use 0 in tests. Ignored without --demo.",
+    )
     return parser
 
 
@@ -66,6 +78,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     output = args.output or Path(f"transcript.{args.format}")
+    if args.demo:
+        return _run_demo(args.url, output, args.format, args.demo_delay)
+
     config = AgentConfig(
         model_size=args.model_size,
         device=args.device,
@@ -90,6 +105,49 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Wrote {segment_count} translated segment(s) to {output}")
     if result.source_language:
         print(f"Detected source language: {result.source_language}")
+    return 0
+
+
+def _run_demo(url: str, output: Path, output_format: str, delay_s: float) -> int:
+    result_payload = None
+    try:
+        events = iter_demo_events(url, delay_s=delay_s)
+        first = next(events)
+    except (OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    print("Demo mode — bundled sample transcript (no download, no Whisper)", flush=True)
+    print(first["message"], flush=True)
+    try:
+        for event in events:
+            if event["status"] == "running":
+                print(event["message"], flush=True)
+            if event["stage"] == "write" and event["status"] == "done":
+                print(event["message"], flush=True)
+                result_payload = event["result"]
+    except (OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    if result_payload is None:
+        print("error: demo run did not produce a transcript", file=sys.stderr)
+        return 1
+
+    segments = demo_segments(result_payload)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    rendered = format_transcript(segments, output_format)
+    output.write_text(rendered, encoding="utf-8")
+
+    print(file=sys.stdout)
+    print(
+        f"English transcript · source {result_payload['source_language']} · "
+        f"{len(segments)} lines · video {result_payload['video_id']}",
+        flush=True,
+    )
+    print(result_payload["notice"], flush=True)
+    print(rendered, end="" if rendered.endswith("\n") else "\n", flush=True)
+    print(f"Wrote {len(segments)} translated segment(s) to {output}", flush=True)
     return 0
 
 
